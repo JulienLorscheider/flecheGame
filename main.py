@@ -8,7 +8,7 @@ import time
 # Variables pour la logique du jeu
 current_arrow = None
 last_arrow_time = None
-arrow_delay = 2.0  # Délai initial en secondes
+arrow_delay = 3.0  # Délai initial en secondes
 
 # Initialiser Pygame
 pygame.init()
@@ -56,6 +56,12 @@ score_font = pygame.font.Font(None, 36)
 text_play_rect = text_play.get_rect(center=(400, 250))
 text_quit_rect = text_quit.get_rect(center=(400, 350))
 
+# Définir une police plus grande pour le titre du jeu
+title_font = pygame.font.Font(None, 72)
+title_text = title_font.render('Flèche Folie', True, (255, 215, 0))  # Or pour le titre
+title_text_shadow = title_font.render('Flèche Folie', True, (0, 0, 0))  # Ombre noire pour le titre
+title_rect = title_text.get_rect(center=(size[0] // 2, size[1] // 4))
+
 # Chemin du dossier des images
 image_folder = os.path.join('.', 'img')
 
@@ -101,7 +107,7 @@ while running:
                     game_state = GAME
                     current_arrow = None
                     last_arrow_time = time.time()
-                    arrow_delay = 2.0
+                    arrow_delay = 3.0
                     score = 0
                 elif event.key == pygame.K_DOWN:  # Choisir 'Quitter'
                     running = False
@@ -177,7 +183,7 @@ while running:
                     game_state = GAME
                     current_arrow = None
                     last_arrow_time = time.time()
-                    arrow_delay = 2.0
+                    arrow_delay = 3.0
                     score = 0
                 elif event.key == pygame.K_DOWN:  # Choisir 'Menu Principal'
                     game_state = MENU
@@ -197,7 +203,7 @@ while running:
                     game_state = GAME
                     current_arrow = None
                     last_arrow_time = time.time()
-                    arrow_delay = 2.0
+                    arrow_delay = 3.0
                     score = 0
                 elif event.key == pygame.K_DOWN:  # Choisir 'Menu Principal'
                     game_state = MENU
@@ -206,6 +212,10 @@ while running:
     screen.blit(background_image, (0, 0))
 
     if game_state == MENU:
+        # Dessiner l'ombre du titre puis le titre pour un effet de profondeur
+        screen.blit(title_text_shadow, (title_rect.x + 2, title_rect.y + 2))  # Légèrement décalé pour l'effet d'ombre
+        screen.blit(title_text, title_rect)
+        
         # Dessiner le texte du menu
         screen.blit(text_play, text_play_rect)
         screen.blit(text_quit, text_quit_rect)
