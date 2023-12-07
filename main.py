@@ -33,7 +33,10 @@ screen_center = (size[0] // 2, size[1] // 2)
 pygame.display.set_caption("Jeu de Flèches")
 
 # États du jeu
-MENU, GAME, END_SCREEN = "menu", "game", "end_screen"
+MENU, RULES, GAME, END_SCREEN = "menu", "rules", "game", "end_screen"
+
+# Variable pour vérifier si les règles ont déjà été affichées
+rules_shown = False
 
 game_state = MENU
 
@@ -65,6 +68,9 @@ title_rect = title_text.get_rect(center=(size[0] // 2, size[1] // 4))
 # Chemin du dossier des images
 image_folder = os.path.join('.', 'img')
 
+# Chemin du fichier pour enregistrer le meilleur score
+highscore_file_path = os.path.join('.', 'highscore.txt')
+
 # Charger les GIFs en tant que séquences d'images
 arrow_gifs = {
     'UP': load_gif(os.path.join(image_folder, 'haut.gif')),
@@ -79,6 +85,22 @@ text_menu = font.render('Menu Principal', True, (255, 255, 255))
 text_restart_rect = text_restart.get_rect(center=(400, 250))
 text_menu_rect = text_menu.get_rect(center=(400, 350))
 
+# Fonction pour charger le meilleur score
+def load_highscore():
+    try:
+        with open(highscore_file_path, 'r') as file:
+            return int(file.read())
+    except FileNotFoundError:
+        return 0
+
+# Fonction pour enregistrer le meilleur score
+def save_highscore(new_highscore):
+    with open(highscore_file_path, 'w') as file:
+        file.write(str(new_highscore))
+
+# Charger le meilleur score au démarrage
+highscore = load_highscore()
+
 # Fonction pour afficher une flèche
 def show_arrow():
     arrow = random.choice(list(arrow_gifs.keys()))
@@ -90,11 +112,21 @@ background_folder = os.path.join(image_folder, 'fond')
 # Charger l'image de fond
 background_image = pygame.image.load(os.path.join(background_folder, 'fond.png'))
 
+# Définir le texte pour les règles
+rules_text_lines = [
+    "Règles du jeu:",
+    "1. Appuyez sur la flèche correspondante avant que",
+    "le temps ne s'écoule.",
+    "2. Le temps s'accélère après chaque flèche réussie.",
+    "Appuyez sur 'Entrée' pour commencer à jouer."
+]
+rules_text = [font.render(line, True, (255, 255, 255)) for line in rules_text_lines]
+
 # Boucle principale du jeu
 running = True
 current_arrow = None
 frame_index = 0  # Index pour suivre le cadre actuel
-frame_delay = 0.05  # Délai en secondes, ajustez selon vos besoins
+frame_delay = 0.025  # Délai en secondes, ajustez selon vos besoins
 last_frame_time = time.time()
 while running:
     for event in pygame.event.get():
@@ -102,15 +134,38 @@ while running:
             running = False
 
         if game_state == MENU:
+            # Dessiner le meilleur score sur le menu principal
+            highscore_text = score_font.render(f"Meilleur Score: {highscore}", True, (255, 255, 255))  # Blanc pour le meilleur score
+            highscore_rect = highscore_text.get_rect(center=(size[0] // 2, size[1] // 2))
+            screen.blit(highscore_text, highscore_rect)
+
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:  # Choisir 'Jouer'
+                    if not rules_shown:
+                        game_state = RULES
+                    else:
+                        game_state = GAME
+                        current_arrow = None
+                        last_arrow_time = time.time()
+                        arrow_delay = 3.0
+                        score = 0
+                elif event.key == pygame.K_DOWN:  # Choisir 'Quitter'
+                    running = False
+
+        elif game_state == RULES:
+            # Afficher les règles
+            for i, line in enumerate(rules_text):
+                screen.blit(line, (50, 150 + i * 30))
+
+            # Attendre que l'utilisateur appuie sur Entrée pour commencer
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
                     game_state = GAME
                     current_arrow = None
                     last_arrow_time = time.time()
                     arrow_delay = 3.0
                     score = 0
-                elif event.key == pygame.K_DOWN:  # Choisir 'Quitter'
-                    running = False
+                    rules_shown = True  # Ne plus afficher les règles à l'avenir
 
         elif game_state == GAME:
             if current_arrow:
@@ -172,6 +227,11 @@ while running:
             screen.blit(score_text, score_rect)
 
         elif game_state == END_SCREEN:
+            # Vérifier si un nouveau score le plus élevé a été atteint
+            if score > highscore:
+                highscore = score
+                save_highscore(highscore)
+
             # Afficher le score final
             final_score_text = score_font.render(f"Score Final: {score}", True, (255, 255, 255))  # Blanc pour le score final
             final_score_rect = final_score_text.get_rect(center=(size[0] // 2, 100))
@@ -189,6 +249,11 @@ while running:
                     game_state = MENU
 
     if game_state == END_SCREEN:
+    # Vérifier si un nouveau score le plus élevé a été atteint
+        if score > highscore:
+            highscore = score
+            save_highscore(highscore)
+
         # Afficher le score final
         final_score_text = score_font.render(f"Score Final: {score}", True, (255, 255, 255))  # Blanc pour le score final
         final_score_rect = final_score_text.get_rect(center=(size[0] // 2, 100))
@@ -212,13 +277,23 @@ while running:
     screen.blit(background_image, (0, 0))
 
     if game_state == MENU:
+        # Dessiner le meilleur score sur le menu principal
+        highscore_text = score_font.render(f"Meilleur Score: {highscore}", True, (255, 255, 255))  # Blanc pour le meilleur score
+        highscore_rect = highscore_text.get_rect(center=(size[0] // 2, size[1] // 2))
+        screen.blit(highscore_text, highscore_rect)
+
         # Dessiner l'ombre du titre puis le titre pour un effet de profondeur
         screen.blit(title_text_shadow, (title_rect.x + 2, title_rect.y + 2))  # Légèrement décalé pour l'effet d'ombre
         screen.blit(title_text, title_rect)
-        
+
         # Dessiner le texte du menu
         screen.blit(text_play, text_play_rect)
         screen.blit(text_quit, text_quit_rect)
+
+    elif game_state == RULES:
+        # Afficher les règles
+        for i, line in enumerate(rules_text):
+            screen.blit(line, (50, 150 + i * 30))
 
     elif game_state == GAME:
         if current_arrow:
@@ -254,6 +329,11 @@ while running:
             screen.blit(score_text, score_rect)
 
     elif game_state == END_SCREEN:
+    # Vérifier si un nouveau score le plus élevé a été atteint
+        if score > highscore:
+            highscore = score
+            save_highscore(highscore)
+
         # Afficher le score final
         final_score_text = score_font.render(f"Score Final: {score}", True, (255, 255, 255))  # Blanc pour le score final
         final_score_rect = final_score_text.get_rect(center=(size[0] // 2, 100))
