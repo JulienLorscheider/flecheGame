@@ -65,11 +65,19 @@ title_text = title_font.render('Flèche Folie', True, (255, 215, 0))  # Or pour 
 title_text_shadow = title_font.render('Flèche Folie', True, (0, 0, 0))  # Ombre noire pour le titre
 title_rect = title_text.get_rect(center=(size[0] // 2, size[1] // 4))
 
-# Chemin du dossier des images
-image_folder = os.path.join('.', 'img')
+# Déterminer si l'application est empaquetée (frozen) ou en cours d'exécution depuis le code source
+if getattr(sys, 'frozen', False):
+    application_path = sys._MEIPASS
+else:
+    application_path = os.path.dirname(os.path.abspath(__file__))
 
-# Chemin du fichier pour enregistrer le meilleur score
-highscore_file_path = os.path.join('.', 'highscore.txt')
+# Utiliser application_path pour construire les chemins d'accès aux ressources
+image_folder = os.path.join(application_path, 'img')
+background_folder = os.path.join(image_folder, 'fond')
+highscore_file_path = os.path.join(application_path, 'highscore.txt')
+
+# Charger l'image de fond et les GIFs en utilisant les chemins ajustés
+background_image = pygame.image.load(os.path.join(background_folder, 'fond.png'))
 
 # Charger les GIFs en tant que séquences d'images
 arrow_gifs = {
@@ -105,12 +113,6 @@ highscore = load_highscore()
 def show_arrow():
     arrow = random.choice(list(arrow_gifs.keys()))
     return arrow
-
-# Chemin du dossier des images de fond
-background_folder = os.path.join(image_folder, 'fond')
-
-# Charger l'image de fond
-background_image = pygame.image.load(os.path.join(background_folder, 'fond.png'))
 
 # Définir le texte pour les règles
 rules_text_lines = [

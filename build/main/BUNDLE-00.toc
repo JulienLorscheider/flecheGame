@@ -1,0 +1,3 @@
+([('main',
+   '/Users/julienlorscheider/Desktop/flecheGame/dist/main',
+   'EXECUTABLE')],)
