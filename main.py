@@ -72,7 +72,7 @@ else:
     application_path = os.path.dirname(os.path.abspath(__file__))
 
 # Utiliser application_path pour construire les chemins d'accès aux ressources
-image_folder = os.path.join(application_path, 'img')
+image_folder = os.path.join(application_path, 'image')
 background_folder = os.path.join(image_folder, 'fond')
 highscore_file_path = os.path.join(application_path, 'highscore.txt')
 

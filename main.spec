@@ -5,7 +5,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('img', 'img'), ('highscore.txt', '.')],
+    datas=[('image', 'image'), ('highscore.txt', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -38,6 +38,6 @@ exe = EXE(
 app = BUNDLE(
     exe,
     name='main.app',
-    icon='img/app/icon.icns',
+    icon='image/app/icon.icns',
     bundle_identifier=None,
 )
