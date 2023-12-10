@@ -76,6 +76,17 @@ image_folder = os.path.join(application_path, 'image')
 background_folder = os.path.join(image_folder, 'fond')
 highscore_file_path = os.path.join(application_path, 'highscore.txt')
 
+pygame.mixer.init()
+
+# Charger les musiques
+sound_folder = os.path.join(application_path, 'sound')
+menu_music = os.path.join(sound_folder, 'menuPrincipal.mp3')
+game_music = os.path.join(sound_folder, 'inGame.mp3')
+end_screen_music = os.path.join(sound_folder, 'menuPerdre.mp3')
+
+# État de la musique actuelle
+current_music_state = None
+
 # Charger l'image de fond et les GIFs en utilisant les chemins ajustés
 background_image = pygame.image.load(os.path.join(background_folder, 'fond.png'))
 
@@ -114,6 +125,11 @@ def show_arrow():
     arrow = random.choice(list(arrow_gifs.keys()))
     return arrow
 
+# Fonction pour changer la musique en fonction de l'état du jeu
+def change_music(music_file):
+    pygame.mixer.music.load(music_file)
+    pygame.mixer.music.play(-1)  # Jouer en boucle
+
 # Définir le texte pour les règles
 rules_text_lines = [
     "Règles du jeu:",
@@ -136,6 +152,10 @@ while running:
             running = False
 
         if game_state == MENU:
+            if current_music_state != 'MENU':
+                change_music(menu_music)
+                current_music_state = 'MENU'
+
             # Dessiner le meilleur score sur le menu principal
             highscore_text = score_font.render(f"Meilleur Score: {highscore}", True, (255, 255, 255))  # Blanc pour le meilleur score
             highscore_rect = highscore_text.get_rect(center=(size[0] // 2, size[1] // 2))
@@ -170,6 +190,10 @@ while running:
                     rules_shown = True  # Ne plus afficher les règles à l'avenir
 
         elif game_state == GAME:
+            if current_music_state != 'GAME':
+                change_music(game_music)
+                current_music_state = 'GAME'
+
             if current_arrow:
                 # Obtenez le temps actuel
                 current_time = time.time()
@@ -229,6 +253,10 @@ while running:
             screen.blit(score_text, score_rect)
 
         elif game_state == END_SCREEN:
+            if current_music_state != 'END_SCREEN':
+                change_music(end_screen_music)
+                current_music_state = 'END_SCREEN'
+
             # Vérifier si un nouveau score le plus élevé a été atteint
             if score > highscore:
                 highscore = score
@@ -331,7 +359,7 @@ while running:
             screen.blit(score_text, score_rect)
 
     elif game_state == END_SCREEN:
-    # Vérifier si un nouveau score le plus élevé a été atteint
+        # Vérifier si un nouveau score le plus élevé a été atteint
         if score > highscore:
             highscore = score
             save_highscore(highscore)
